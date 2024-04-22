@@ -155,9 +155,11 @@ private:
 			vector<Texture> specularMaps = this->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular"); // Set specularMaps
 			textures.insert(textures.end(), specularMaps.begin(), specularMaps.end()); // Insert textures
 		}
-		cout << "Number of vertices:" << vertices.size() << endl;
-		cout << "Number of textures:" << textures.size() << endl;
-		cout << "Number of indices:" << indices.size() << endl;
+		//Debug output
+		// cout << "Number of vertices:" << vertices.size() << endl;
+		// cout << "Number of textures:" << textures.size() << endl;
+		// cout << "Number of indices:" << indices.size() << endl;
+		
 		// Return a mesh object created from the extracted mesh data
 		return Mesh(vertices, indices, textures); // Return Mesh object from vertices, indices, textures defined above
 	}

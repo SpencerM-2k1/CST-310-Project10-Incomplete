@@ -72,23 +72,12 @@ int main() {
     Shader cylinderShader("cylinder.vs", "cylinder.frag"); // Create shader for cylinder object
     // Shader cylinderShader("cylinder2.vs", "cylinder2.frag"); // Create shader for cylinder object
     Shader sphereShader("sphere.vs", "sphere.frag"); // Create shader for sphere object
+    // Shader sphereShader("cylinder.vs", "cylinder.frag"); // Create shader for cylinder object
     // Shader sphereShader("sphere2.vs", "sphere2.frag"); // Create shader for sphere object
-
-    // Load sphere textures
-    // load textures
-    // -------------
-    unsigned int diffuseMap = loadTexture("resources/textures/Bump-Picture.jpg");
-    unsigned int normalMap  = loadTexture("resources/textures/Bump-Normal.jpg");
-    unsigned int heightMap  = loadTexture("resources/textures/Bump-Map.jpg");
 
     // Models for Cylinder and Sphere
     Model cylinderModel("cylinder.obj"); // Defines model for cylinder using obj
     Model sphereModel("sphere.obj"); // Define model for sphere using obj
-
-
-    sphereModel.assignTexture(diffuseMap);
-    sphereModel.assignTexture(normalMap);
-    sphereModel.assignTexture(heightMap);
 
     GLfloat vertices[] = {
         // Coordinates: 3 Position, 2 Texture, 3 Color
@@ -242,9 +231,21 @@ int main() {
 
     glm::vec3 cylinderOffset(-0.4f, -2.98f, -0.15f); //Used to roughly overlap cylinder base with sphere base
 
-    unsigned int cylinderTexture = loadTexture("resources/textures/Bump-Picture.jpg");
+
+    // load textures
+    // -------------
+    // Load cylinder textures
+    // unsigned int cylinderTexture = loadTexture("resources/textures/Bump-Picture.jpg");
+    unsigned int cylinderTexture = loadTexture("resources/textures/Bump-Map.jpg");
     unsigned int cylinderMap = loadTexture("resources/textures/Bump-Map.jpg");
+    // unsigned int cylinderMap  = loadTexture("resources/textures/Bump-Map-Inverted.jpg");
     unsigned int cylinderNormal = loadTexture("resources/textures/Bump-Normal.jpg");
+
+    // Load sphere textures
+    unsigned int sphereDiffuseMap = loadTexture("resources/textures/Bump-Picture.jpg");
+    unsigned int sphereNormalMap  = loadTexture("resources/textures/Bump-Normal.jpg");
+    unsigned int sphereHeightMap  = loadTexture("resources/textures/Bump-Map.jpg");
+    // unsigned int sphereHeightMap  = loadTexture("resources/textures/Bump-Map-Inverted.jpg");
 
     // Game Loop
     while (!glfwWindowShouldClose(window))
@@ -330,7 +331,7 @@ int main() {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cylinderTexture);
-        cylinderShader.setInt("bumpTexture", 0);
+        cylinderShader.setInt("diffuseMap", 0);
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, cylinderMap);
@@ -338,7 +339,7 @@ int main() {
 
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, cylinderNormal);
-        cylinderShader.setInt("bumpNormal", 2);
+        cylinderShader.setInt("normalMap", 2);
 
         GLint cylinderColorLoc = glGetUniformLocation(cylinderShader.Program, "cylinderColor"); // Retrieve cylinderColor location
         lightColorLoc = glGetUniformLocation(cylinderShader.Program, "lightColor"); // Reset lightColor location
@@ -368,9 +369,26 @@ int main() {
 
         cylinderModel.Draw(cylinderShader); // Draw obj model
 
+        glBindVertexArray(0); // Bind zero at end
         
         // SPHERE
         sphereShader.Use(); // Activate sphereShader
+
+        // glActiveTexture(GL_TEXTURE0);
+        // glBindTexture(GL_TEXTURE_2D, sphereDiffuseMap);
+        // sphereShader.setInt("diffuseMap", 0);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, sphereDiffuseMap);
+        sphereShader.setInt("diffuseMap", 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, sphereHeightMap);
+        sphereShader.setInt("bumpMap", 1);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, sphereNormalMap);
+        sphereShader.setInt("normalMap", 2);
 
         GLint sphereColorLoc = glGetUniformLocation(sphereShader.Program, "sphereColor"); // Retrieve sphereColor location
         lightColorLoc = glGetUniformLocation(sphereShader.Program, "lightColor"); // Reset lightColor location for sphereShader
@@ -378,9 +396,9 @@ int main() {
         viewPosLoc = glGetUniformLocation(sphereShader.Program, "viewPos"); // Reset viewPos location for sphereShader
 
         glUniform3f(sphereColorLoc, 0.0f, 0.0f, 1.0f); // Pass in sphere color to uniform
-        //glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Pass in light color to uniform
-        //glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z); // Pass in light position to uniform
-        //glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z); // Pass in camera position to uniform
+        glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f); // Pass in light color to uniform
+        glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z); // Pass in light position to uniform
+        glUniform3f(viewPosLoc, camera.Position.x, camera.Position.y, camera.Position.z); // Pass in camera position to uniform
 
         modelLoc = glGetUniformLocation(sphereShader.Program, "model"); // Reset model uniform location for sphereShader
         viewLoc = glGetUniformLocation(sphereShader.Program, "view"); // Reset view uniform location for sphereShader
