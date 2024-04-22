@@ -241,6 +241,8 @@ int main() {
 
     glm::vec3 cylinderOffset(-0.4f, -2.98f, -0.15f); //Used to roughly overlap cylinder base with sphere base
 
+    unsigned int cylinderTexture = loadTexture("resources/textures/Bump-Map.jpg");
+
     // Game Loop
     while (!glfwWindowShouldClose(window)) {
         // Calculate deltaTime for camera movement
@@ -320,6 +322,10 @@ int main() {
 
         // CYLINDER
         cylinderShader.Use(); // Activate cylinder shader
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, cylinderTexture);
+        cylinderShader.setInt("bumpMap", 1);
 
         GLint cylinderColorLoc = glGetUniformLocation(cylinderShader.Program, "cylinderColor"); // Retrieve cylinderColor location
         lightColorLoc = glGetUniformLocation(cylinderShader.Program, "lightColor"); // Reset lightColor location
