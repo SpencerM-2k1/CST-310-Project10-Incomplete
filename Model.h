@@ -48,7 +48,7 @@ public:
 		Texture newTexture = {textureID, type, path};
 		meshes[0].textures.push_back(newTexture);
 	}
-	
+
 private:
 	/*  Model Data  */
 	vector<Mesh> meshes; // Vector of meshes

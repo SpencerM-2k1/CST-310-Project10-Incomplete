@@ -1,33 +1,54 @@
-#version 330 core
-out vec4 FragColor; // Returns FragColor
+#version 330 core // Specify OpenGL version
 
-in vec3 Normal; // Receives Normal
-in vec3 FragPos; // Receives FragPos
-  
-uniform vec3 lightPos; // Receives lightPos uniform
-uniform vec3 viewPos; // Receives viewPos uniform
-uniform vec3 lightColor; // Recieves lightColor uniform
-uniform vec3 cylinderColor; // Receives cylinderColor uniform
+// Input from vertex shader
+in vec3 FragPos; // Fragment position
+in vec3 Normal; // Normal vector
+in vec2 TexCoords; // Texture coordinates
+
+// Output to screen
+out vec4 color; // Output color to screen
+
+// Uniforms
+uniform vec3 lightColor; // Light color
+uniform vec3 lightPos; // Light position
+uniform vec3 viewPos; // View position
+uniform sampler2D diffuseMap; // Diffuse texture map
+uniform sampler2D normalMap; // Normal texture map
+uniform sampler2D heightMap; // Height texture map
+uniform sampler2D bumpMap; // Bump map texture
 
 void main()
 {
-    // ambient
-    float ambientStrength = 0.8;  // Set ambient strength
-    vec3 ambient = ambientStrength * lightColor;  // Sets ambient - multiplies strength decimal by light color
-  	
-    // diffuse 
-    vec3 norm = normalize(Normal);  // Normalizes normal
-    vec3 lightDir = normalize(lightPos - FragPos);  // Sets light direction based on light - frag position
-    float diff = max(dot(norm, lightDir), 0.0);  // Diff value based on max method and dot product
-    vec3 diffuse = diff * lightColor;  // Sets diffuse
-    
-    // specular
-    float specularStrength = 0.25f;  // Sets specular strength
-    vec3 viewDir = normalize(viewPos - FragPos);  // Sets view direction
-    vec3 reflectDir = reflect(-lightDir, norm);  // Sets reflect direction
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8);  // Sets specular based on power, max, and dot product
-    vec3 specular = specularStrength * spec * lightColor;  // Sets specular
-        
-    vec3 result = (ambient + diffuse + specular) * cylinderColor;  // Adds ambient, diffuse, and specular and multiplies by wall color
-    FragColor = vec4(result, 1.0f);  // Sets vec4 based on result
-} 
+    // Ambient lighting
+    float ambientStrength = 0.8;
+    vec3 ambient = ambientStrength * lightColor;
+
+    // Diffuse lighting
+    vec3 norm = normalize(texture(normalMap, TexCoords).rgb * 2.0 - 1.0); // Use normal map
+    vec3 lightDir = normalize(lightPos - FragPos);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * lightColor;
+
+    // Specular lighting
+    float specularStrength = 0.5;
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = specularStrength * spec * lightColor;
+
+    // Combine lighting components
+    vec3 result = (ambient + diffuse + specular);
+
+    // Sample diffuse texture
+    vec3 texture1 = texture(diffuseMap, TexCoords).rgb;
+
+    // Apply height mapping for parallax mapping
+    float height = texture(heightMap, TexCoords).r;
+    vec2 offset = height * norm.xy;
+
+    // Calculate final texture coordinates
+    vec2 texCoord = TexCoords + offset;
+
+    // Final color calculation with lighting and textures
+    color = vec4(result * texture1, 1.0);
+}
