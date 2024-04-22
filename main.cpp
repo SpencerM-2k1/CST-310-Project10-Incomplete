@@ -70,6 +70,7 @@ int main() {
     // Shader cubeShader("cube.vs", "cube.frag"); // Create shader for cube object
     Shader cubeShader("cube2.vs", "cube2.frag"); // Create shader for cube object
     Shader cylinderShader("cylinder.vs", "cylinder.frag"); // Create shader for cylinder object
+    // Shader cylinderShader("cylinder2.vs", "cylinder2.frag"); // Create shader for cylinder object
     Shader sphereShader("sphere.vs", "sphere.frag"); // Create shader for sphere object
     // Shader sphereShader("sphere2.vs", "sphere2.frag"); // Create shader for sphere object
 
@@ -241,10 +242,14 @@ int main() {
 
     glm::vec3 cylinderOffset(-0.4f, -2.98f, -0.15f); //Used to roughly overlap cylinder base with sphere base
 
-    unsigned int cylinderTexture = loadTexture("resources/textures/Bump-Map.jpg");
+    unsigned int cylinderTexture = loadTexture("resources/textures/Bump-Picture.jpg");
+    unsigned int cylinderMap = loadTexture("resources/textures/Bump-Map.jpg");
+    unsigned int cylinderNormal = loadTexture("resources/textures/Bump-Normal.jpg");
 
     // Game Loop
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    //for (int i = 0; i < 2; i++)
+    {
         // Calculate deltaTime for camera movement
         GLfloat currentFrame = glfwGetTime(); // Get current time
         deltaTime = currentFrame - lastFrame; // Calculate change in time
@@ -323,9 +328,17 @@ int main() {
         // CYLINDER
         cylinderShader.Use(); // Activate cylinder shader
 
-        glActiveTexture(GL_TEXTURE1);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cylinderTexture);
+        cylinderShader.setInt("bumpTexture", 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, cylinderMap);
         cylinderShader.setInt("bumpMap", 1);
+
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, cylinderNormal);
+        cylinderShader.setInt("bumpNormal", 2);
 
         GLint cylinderColorLoc = glGetUniformLocation(cylinderShader.Program, "cylinderColor"); // Retrieve cylinderColor location
         lightColorLoc = glGetUniformLocation(cylinderShader.Program, "lightColor"); // Reset lightColor location
@@ -398,6 +411,7 @@ int main() {
         glfwSwapBuffers(window); // Swap screen buffers
 
     }
+    //while (true);
     // Deallocate resources
     glDeleteVertexArrays(1, &VAO); // Deallocate vertex arrays
     glDeleteBuffers(1, &VBO); // Deallocate buffers
